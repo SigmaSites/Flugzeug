@@ -1,4 +1,70 @@
-<!-- Beispiel für eine README-Datei von GitHub -->
-<a href="https://raw.githubusercontent.com/SigmaSites/Flugzeug/refs/heads/main/Klo-Counter.html" download="Klo-Counter.html">
-    GitHub README herunterladen
-</a>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>GitHub README im GitHub-Style herunterladen</title>
+    <!-- Offizielles GitHub-Markdown-Design -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        body { font-family: sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+        button { padding: 12px 24px; font-size: 16px; background: #2ea44f; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #2c974b; }
+    </style>
+</head>
+<body>
+
+    <h2>GitHub README als gestaltetes HTML speichern</h2>
+    <p>Klicken Sie auf den Button, um die README umzuwandeln und im originalen Design herunterzuladen.</p>
+    
+    <button onclick="downloadGitHubReadme()">README herunterladen</button>
+
+    <script>
+    async function downloadGitHubReadme() {
+        // 1. ERSETZEN SIE DIESE URL durch Ihren eigenen GitHub-Raw-Link:
+        const rawReadmeUrl = 'https://raw.githubusercontent.com/SigmaSites/Flugzeug/refs/heads/main/Klo-Counter.html';
+
+        try {
+            // Text von GitHub holen
+            const response = await fetch(rawReadmeUrl);
+            const markdownText = await response.text();
+
+            // Über die GitHub API in HTML umwandeln
+            const apiResponse = await fetch('https://github.com', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: markdownText })
+            });
+            const htmlContent = await apiResponse.text();
+
+            // Vollständiges HTML-Dokument mit CSS-Klassen zusammenbauen
+            const fullHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>README</title>
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
+        @media (max-width: 767px) { body { padding: 15px; } }
+    </style>
+</head>
+<body class="markdown-body">
+    ${htmlContent}
+</body>
+</html>`;
+
+            // Datei-Download im Browser triggern
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'README.html';
+            link.click();
+
+        } catch (error) {
+            alert('Fehler beim Laden oder Konvertieren der Datei: ' + error.message);
+        }
+    }
+    </script>
+</body>
+</html>
