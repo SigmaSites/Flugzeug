@@ -3,28 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub READMEs herunterladen (Offline-Version)</title>
+    <title>GitHub HTML-Dateien herunterladen</title>
     <style>
-        /* Design für die App-Oberfläche */
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; max-width: 450px; margin: 40px auto 0 auto; background-color: #f6f8fa; }
-        .card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #d0d7de; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+            padding: 20px; 
+            max-width: 450px; 
+            margin: 40px auto; 
+            background-color: #f6f8fa; 
+        }
+        .card { 
+            background: white; 
+            padding: 24px; 
+            border-radius: 12px; 
+            border: 1px solid #d0d7de; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            text-align: center; 
+        }
         h2 { color: #24292f; margin-bottom: 8px; font-size: 20px; }
         p { color: #57606a; font-size: 14px; margin-bottom: 24px; }
-        button { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 14px; }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-bottom: 14px; 
+        }
         .btn-1 { background-color: #2ea44f; }
         .btn-2 { background-color: #0969da; }
+        .error-box { 
+            background: #ffebe9; 
+            color: #cf222e; 
+            padding: 12px; 
+            border-radius: 6px; 
+            border: 1px solid rgba(207,34,46,0.2); 
+            font-size: 13px; 
+            text-align: left; 
+            display: none; 
+            margin-top: 15px; 
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Offline-READMEs speichern</h2>
-        <p>Diese Dateien funktionieren nach dem Download komplett ohne Internetverbindung.</p>
-        <button class="btn-1" onclick="handleDownload(1)">Datei 1 herunterladen</button>
-        <button class="btn-2" onclick="handleDownload(2)">Datei 2 herunterladen</button>
+        <h2>HTML-Apps speichern</h2>
+        <p>Tippen Sie auf die Buttons, um die HTML-Dateien direkt für die Offline-Nutzung auf Ihrem Smartphone zu sichern.</p>
+        
+        <button class="btn-1" onclick="handleDownload(1)">Klo Counter herunterladen</button>
+        <button class="btn-2" onclick="handleDownload(2)">Umrechner herunterladen</button>
+        
+        <div id="errorDisplay" class="error-box"></div>
     </div>
 
     <script>
+    // Ihre exakten GitHub-Raw-Links
     const config = {
         datei1: {
             url: 'https://raw.githubusercontent.com/SigmaSites/Flugzeug/refs/heads/main/Klo-Counter.html',
@@ -38,46 +76,17 @@
 
     async function handleDownload(id) {
         const fileConfig = id === 1 ? config.datei1 : config.datei2;
+        const errBox = document.getElementById('errorDisplay');
+        errBox.style.display = 'none';
         
         try {
-            // 1. Text von GitHub holen
+            // 1. Quelltext der HTML-Datei direkt von GitHub holen
             const response = await fetch(fileConfig.url);
-            if (!response.ok) throw new Error('Datei konnte nicht geladen werden.');
-            const markdownText = await response.text();
+            if (!response.ok) throw new Error('Datei konnte nicht geladen werden. GitHub-Status: ' + response.status);
+            const htmlContent = await response.text();
 
-            // 2. In HTML umwandeln via GitHub API
-            const apiResponse = await fetch('https://github.com', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: markdownText })
-            });
-            if (!apiResponse.ok) throw new Error('API-Fehler.');
-            const htmlContent = await apiResponse.text();
-
-            // 3. Das GitHub-Design live herunterladen, um es fest einzubetten
-            const cssResponse = await fetch('https://cloudflare.com');
-            const embeddedCSS = cssResponse.ok ? await cssResponse.text() : '';
-
-            // 4. Das finale, komplett unabhängige Offline-Dokument bauen
-            const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>README - ${id}</title>
-    <style>
-        /* Eingebettetes GitHub-Design für 100% Offline-Nutzer */
-        ${embeddedCSS}
-        body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 30px 15px; }
-    </style>
-</head>
-<body class="markdown-body">
-    ${htmlContent}
-</body>
-</html>`;
-
-            // 5. Download auslösen
-            const blob = new Blob([fullHtml], { type: 'text/html' });
+            // 2. Direkt als fertige HTML-Datei im Smartphone-Browser zum Download anbieten
+            const blob = new Blob([htmlContent], { type: 'text/html' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = fileConfig.filename;
@@ -85,41 +94,8 @@
             URL.revokeObjectURL(link.href);
 
         } catch (error) {
-            alert('Fehler bei Datei ' + id + ': ' + error.message);
-        }
-    }
-    </script>
-</body>
-</html>
-            const htmlContent = await apiResponse.text();
-
-            // Vollständiges HTML-Dokument mit CSS-Klassen zusammenbauen
-            const fullHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>README</title>
-    <link rel="stylesheet" href="https://cloudflare.com">
-    <style>
-        body { box-sizing: border-box; min-width: 200px; max-width: 980px; margin: 0 auto; padding: 45px; }
-        @media (max-width: 767px) { body { padding: 15px; } }
-    </style>
-</head>
-<body class="markdown-body">
-    ${htmlContent}
-</body>
-</html>`;
-
-            // Datei-Download im Browser triggern
-            const blob = new Blob([fullHtml], { type: 'text/html' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'README.html';
-            link.click();
-
-        } catch (error) {
-            alert('Fehler beim Laden oder Konvertieren der Datei: ' + error.message);
+            errBox.innerText = "Fehler-Details:\n" + error.message + "\n\nHinweis: Wenn dieser Fehler auftritt, sperrt Ihr Browser den Zugriff (CORS). Laden Sie diese Downloader-Datei zuerst auf einen Webspace (z.B. GitHub Pages) hoch, anstatt sie lokal zu öffnen.";
+            errBox.style.display = 'block';
         }
     }
     </script>
