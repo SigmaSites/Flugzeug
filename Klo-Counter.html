@@ -22,11 +22,6 @@
     margin-bottom: 0.2rem;
     letter-spacing: 0.5px;
   }
-  .sub {
-    color: #2b2d42;
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
-  }
   .count {
     font-size: 6rem;
     font-weight: 700;
@@ -166,7 +161,6 @@
 <body>
 
   <h1>Klo Counter</h1>
-  <div class="sub">Heute: <span id="today-date"></span></div>
 
   <div class="count" id="count">0</div>
 
@@ -208,12 +202,6 @@
 <script>
   const STORAGE_KEY = "klo-counter-value";
   const countEl = document.getElementById("count");
-  const dateEl = document.getElementById("today-date");
-
-  function getToday() {
-    return new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
-  }
-  dateEl.textContent = getToday();
 
   function loadCount() {
     const stored = localStorage.getItem(STORAGE_KEY);
