@@ -14,7 +14,9 @@
             --blue-dark: #1fa8e0;
             --purple: #612A6F;
             --purple-dark: #451c4f;
-            --bg-start: #2b2d4;
+            --yellow: #123456;
+            --yellow-dark: #654321;
+            --bg-start: #2b2d42;
             --bg-end: #1a1c2e;
             --card-bg: #23253f;
             --text: #f4f4f9;
@@ -86,6 +88,9 @@
         /*Lila*/
         button[data-color="purple"] { background: var(--purple); color: #ffffff; }
         button[data-color="purple"]:hover:not(:disabled) { background: var(--purple-dark); }
+        /*Gelb*/
+        button[data-color="yellow"] { background: var(--yellow); color: #92400E; }
+        button[data-color="yellow"]:hover:not(:disabled) { background: var(--red-dark); }
 
         .spinner {
             width: 15px;
@@ -140,7 +145,7 @@
         {
             id: 'klo-counter',
             label: 'Klo Counter',
-            color: 'green',
+            color: 'yellow',
             url: 'https://raw.githubusercontent.com/SigmaSites/Flugzeug/refs/heads/main/Klo-Counter.html',
             filename: 'Klo Counter.html'
         },
