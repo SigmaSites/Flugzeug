@@ -1,26 +1,29 @@
-DOCTYPE html
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Seite</title>
     <style>
-        :root {
-            --green: #4ade80;
-            --green-dark: #34c073;
-            --green-text: #10331e;
+        :root {            
             --red: #ef4444;
             --red-dark: #b91c1c;
             --red-text: #330a0a;
+            --yellow: #eab308;
+            --yellow-dark: #a16207;
+            --yellow-text: #2d2003;
+            --orange: #ffffff;
+            --orange-dark: #ffffff;
+            --orange-text: #ffffff
+            --green: #4ade80;
+            --green-dark: #34c073;
+            --green-text: #10331e;
             --blue: #38bdf8;
             --blue-dark: #1fa8e0;
             --blue-text: #072a3a;
             --purple: #612A6F;
             --purple-dark: #451c4f;
             --purple-text: #ffffff;
-            --yellow: #eab308;
-            --yellow-dark: #a16207;
-            --yellow-text: #2d2003;
             --bg-start: #2b2d42;
             --bg-end: #1a1c2e;
             --card-bg: #23253f;
@@ -81,21 +84,22 @@ DOCTYPE html
         button:disabled { cursor: not-allowed; opacity: 0.7; }
         button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
+        /*Rot*/
+        button[data-color="red"] { background: var(--red); color: var(--red-text); }
+        button[data-color="red"]:hover:not(:disabled) { background: var(--red-dark); }       
+        /*Gelb*/
+        button[data-color="yellow"] { background: var(--yellow); color: var(--yellow-text); }
+        button[data-color="yellow"]:hover:not(:disabled) { background: var(--yellow-dark); }
         /*Grün*/
         button[data-color="green"] { background: var(--green); color: var(--green-text); }
         button[data-color="green"]:hover:not(:disabled) { background: var(--green-dark); }
         /*Blau*/
         button[data-color="blue"] { background: var(--blue); color: var(--blue-text); }
         button[data-color="blue"]:hover:not(:disabled) { background: var(--blue-dark); }
-        /*Rot*/
-        button[data-color="red"] { background: var(--red); color: var(--red-text); }
-        button[data-color="red"]:hover:not(:disabled) { background: var(--red-dark); }
         /*Lila*/
         button[data-color="purple"] { background: var(--purple); color: var(--purple-text); }
         button[data-color="purple"]:hover:not(:disabled) { background: var(--purple-dark); }
-        /*Gelb*/
-        button[data-color="yellow"] { background: var(--yellow); color: var(--yellow-text); }
-        button[data-color="yellow"]:hover:not(:disabled) { background: var(--yellow-dark); }
+
 
         
         .spinner {
@@ -162,13 +166,13 @@ DOCTYPE html
             url: 'https://raw.githubusercontent.com/SigmaSites/Flugzeug/refs/heads/main/Umrechner.html',
             filename: 'Umrechner.html'
         },
-        /*{
+        {
             id: 'test',
             label: 'Test',
-            color: 'purple',
+            color: 'orange',
             url: 'https://raw.githubusercontent.com/SigmaSites/Flugzeug/refs/heads/main/test.html',
             filename: 'Test.html'
-        },*/
+        },
 
     ];
 
