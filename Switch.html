@@ -6,6 +6,7 @@
 <title>Flugmodus Toggle</title>
 <style>
   :root {
+    --rotation-speed: 0,8s;
     --switch-width: 220px;
     --switch-height: 110px;
     --bg-light: #f4f5f7;
@@ -92,12 +93,7 @@
     padding: 0;
     -webkit-tap-highlight-color: transparent;
     background: linear-gradient(180deg, #8a8f98, #6b7078);
-    transition: background 0.6s ease;
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.25), 0 4px 14px rgba(0,0,0,0.15);
-  }
-
-  .switch.on {
-    background: linear-gradient(180deg, #4facfe, #2f8ae0);
   }
 
   /* Runway (off state) */
@@ -107,10 +103,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 1;
-    transition: opacity 0.5s ease;
   }
-  .switch.on .runway { opacity: 0; }
 
   .runway::before {
     content: "";
@@ -153,10 +146,7 @@
   .sky {
     position: absolute;
     inset: 0;
-    opacity: 0;
-    transition: opacity 0.5s ease;
   }
-  .switch.on .sky { opacity: 1; }
 
   .cloud {
     position: absolute;
@@ -191,12 +181,8 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-    transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     touch-action: none;
     cursor: grab;
-  }
-  .switch.on .knob {
-    left: calc(100% - var(--switch-height) / 2);
   }
   .switch.dragging .knob {
     cursor: grabbing;
@@ -205,23 +191,9 @@
   .knob svg {
     width: 55%;
     height: 55%;
-    transition: transform 0.5s ease, fill 0.4s ease;
     fill: #4a4f58;
-  }
-  .switch.on .knob svg {
-    fill: #2f8ae0;
     transform: rotate(90deg);
-  }
-
-  .switch:active .knob {
-    transform: translate(-50%, -50%) scale(0.94);
-  }
-
-  .switch.dragging .knob,
-  .switch.dragging .runway,
-  .switch.dragging .sky,
-  .switch.dragging {
-    transition: none !important;
+    transition: transform var(--rotation-speed) ease;
   }
 
   .hint {
@@ -259,91 +231,137 @@
 <script>
   const btn = document.getElementById('switchBtn');
   const knob = btn.querySelector('.knob');
+  const svg = knob.querySelector('svg');
+  const runway = btn.querySelector('.runway');
+  const sky = btn.querySelector('.sky');
   const status = document.getElementById('statusText');
 
   let on = false;
+  let progress = 0;       // 0 = ganz aus, 1 = ganz an - fließender Wert
+  let facingRight = true; // Nase zeigt in Bewegungsrichtung: rechts = Start/Steigflug, links = Landung
+  let lastProgress = 0;
   let dragging = false;
-  let startX = 0;
-  let startLeftPx = 0;
-  let switchWidthPx = 0;
-  let knobSizePx = 0;
-  let edgePad = 10; // Abstand Knob-Rand zum Switch-Rand, wie im CSS (10px)
+  let pressed = false;
   let moved = false;
+  let startX = 0;
+  let startProgress = 0;
+  let animFrame = null;
+  const edgePad = 10; // wie im CSS: Abstand Knob-Rand zum Switch-Rand
+  const liftAmount = 16; // px, wie hoch das Flugzeug im "Himmel" schwebt
 
-  function setState(next, animate = true) {
-    on = next;
-    btn.classList.toggle('on', on);
-    btn.setAttribute('aria-checked', on ? 'true' : 'false');
-    status.textContent = on ? 'An' : 'Aus';
-    knob.style.left = '';
-    knob.style.transition = animate ? '' : 'none';
+  function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+  function lerpColor(hex1, hex2, t) {
+    const c1 = parseInt(hex1.slice(1), 16);
+    const c2 = parseInt(hex2.slice(1), 16);
+    const r = Math.round(lerp((c1 >> 16) & 255, (c2 >> 16) & 255, t));
+    const g = Math.round(lerp((c1 >> 8) & 255, (c2 >> 8) & 255, t));
+    const b = Math.round(lerp(c1 & 255, c2 & 255, t));
+    return `rgb(${r}, ${g}, ${b})`;
   }
 
-  function clamp(v, min, max) {
-    return Math.min(Math.max(v, min), max);
-  }
-
-  function getLeftBounds() {
-    switchWidthPx = btn.clientWidth;
-    knobSizePx = knob.offsetWidth;
-    const min = knobSizePx / 2 + edgePad;
-    const max = switchWidthPx - knobSizePx / 2 - edgePad;
+  function getBounds() {
+    const knobSize = knob.offsetWidth;
+    const min = knobSize / 2 + edgePad;
+    const max = btn.clientWidth - knobSize / 2 - edgePad;
     return { min, max };
   }
 
+  // Zeichnet den Switch für einen beliebigen Zwischenwert 0..1
+  function render(p) {
+    const { min, max } = getBounds();
+    const leftPx = lerp(min, max, p);
+    knob.style.left = leftPx + 'px';
+
+    // Vertikal: bei p=0 sitzt das Flugzeug genau auf der Landebahn-Linie,
+    // bei p=1 schwebt es oben im Himmel - dazwischen fließend interpoliert.
+    // Beim Ausschalten (p -> 0) "sinkt" es also sichtbar Richtung Landebahn.
+    const lift = -liftAmount * easeInOutQuad(p);
+    const scale = pressed ? 0.94 : 1;
+    knob.style.transform = `translate(-50%, calc(-50% + ${lift}px)) scale(${scale})`;
+
+    runway.style.opacity = 1 - p;
+    sky.style.opacity = p;
+
+    const topColor = lerpColor('#8a8f98', '#4facfe', p);
+    const bottomColor = lerpColor('#6b7078', '#2f8ae0', p);
+    btn.style.background = `linear-gradient(180deg, ${topColor}, ${bottomColor})`;
+
+    svg.style.fill = lerpColor('#4a4f58', '#2f8ae0', p);
+    svg.style.transform = `rotate(${facingRight ? 90 : -90}deg)`;
+  }
+
+  function settle(targetOn) {
+    cancelAnimationFrame(animFrame);
+    facingRight = targetOn; // an/steigen = rechts, aus/landen = links
+    const from = progress;
+    const to = targetOn ? 1 : 0;
+    const duration = 260;
+    const start = performance.now();
+
+    function easeOutBack(t) {
+      const c1 = 1.70158, c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    }
+
+    function step(now) {
+      const t = clamp((now - start) / duration, 0, 1);
+      progress = lerp(from, to, easeOutBack(t));
+      render(clamp(progress, 0, 1));
+      if (t < 1) {
+        animFrame = requestAnimationFrame(step);
+      } else {
+        progress = to;
+        render(progress);
+        on = targetOn;
+        btn.setAttribute('aria-checked', on ? 'true' : 'false');
+        status.textContent = on ? 'An' : 'Aus';
+      }
+    }
+    animFrame = requestAnimationFrame(step);
+  }
+
   function onPointerDown(e) {
+    cancelAnimationFrame(animFrame);
     dragging = true;
+    pressed = true;
     moved = false;
     btn.classList.add('dragging');
     knob.setPointerCapture(e.pointerId);
-
-    const { min, max } = getLeftBounds();
-    const rect = btn.getBoundingClientRect();
-    // aktuelle Knob-Mitte relativ zum Switch berechnen
-    const knobRect = knob.getBoundingClientRect();
-    startLeftPx = clamp(
-      (knobRect.left + knobRect.width / 2) - rect.left,
-      min,
-      max
-    );
     startX = e.clientX;
-
-    knob.style.transition = 'none';
+    startProgress = progress;
+    render(progress);
   }
 
   function onPointerMove(e) {
     if (!dragging) return;
+    const { min, max } = getBounds();
     const dx = e.clientX - startX;
     if (Math.abs(dx) > 3) moved = true;
 
-    const { min, max } = getLeftBounds();
-    const newLeft = clamp(startLeftPx + dx, min, max);
-    knob.style.left = newLeft + 'px';
+    const deltaProgress = dx / (max - min);
+    const newProgress = clamp(startProgress + deltaProgress, 0, 1);
 
-    // Hintergrund/Runway-Sky live nach Position ein-/ausblenden
-    const progress = (newLeft - min) / (max - min);
-    btn.classList.toggle('on', progress > 0.5);
+    if (newProgress !== lastProgress) {
+      facingRight = newProgress > lastProgress;
+    }
+    lastProgress = newProgress;
+    progress = newProgress;
+    render(progress);
   }
 
-  function onPointerUp(e) {
+  function onPointerUp() {
     if (!dragging) return;
     dragging = false;
+    pressed = false;
     btn.classList.remove('dragging');
-    knob.style.transition = '';
-    knob.style.left = '';
-
-    const { min, max } = getLeftBounds();
-    const rect = btn.getBoundingClientRect();
-    const knobRect = knob.getBoundingClientRect();
-    const currentLeft = (knobRect.left + knobRect.width / 2) - rect.left;
-    const progress = (currentLeft - min) / (max - min);
 
     if (moved) {
-      // War ein Drag -> nach Position entscheiden
-      setState(progress > 0.5);
+      settle(progress > 0.5);
     } else {
-      // War nur ein Tap -> umschalten
-      setState(!on);
+      settle(!on);
     }
   }
 
@@ -355,8 +373,12 @@
   // Klick irgendwo sonst auf den Switch (nicht auf den Knob) = auch umschalten
   btn.addEventListener('click', (e) => {
     if (e.target === knob || knob.contains(e.target)) return;
-    setState(!on);
+    settle(!on);
   });
+
+  // Startzustand zeichnen
+  render(progress);
+  window.addEventListener('resize', () => render(progress));
 </script>
 
 </body>
