@@ -247,7 +247,7 @@
   let startProgress = 0;
   let animFrame = null;
   const edgePad = 10; // wie im CSS: Abstand Knob-Rand zum Switch-Rand
-  const liftAmount = 16; // px, wie hoch das Flugzeug im "Himmel" schwebt
+  const liftAmount = 8; // px - bewusst klein gehalten, damit der Knopf nie über den Switch-Rand hinausragt und abgeschnitten wird
 
   function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
   function lerp(a, b, t) { return a + (b - a) * t; }
