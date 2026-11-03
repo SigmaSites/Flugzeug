@@ -6,14 +6,24 @@
 </head>
 <body>
 
-    <h1>Kleidungs-Urlaubsrechner</h1>
+    <h1>Kleidungsplaner</h1>
     
-    <label for="tage">Wie viele Tage bist du im Urlaub?</label>
-    <input type="number" id="tage" min="1" value="1">
+    <p>
+        <label for="naechte">Wie viele Nächte bleibst du?</label><br>
+        <input type="number" id="naechte" min="0" value="1">
+    </p>
+
+    <p>
+        <label for="brauchtPulli">Brauchst du überhaupt Pullis?</label><br>
+        <select id="brauchtPulli">
+            <option value="ja">Ja</option>
+            <option value="nein">Nein (Sommerurlaub)</option>
+        </select>
+    </p>
     
     <button onclick="berechneKleidung()">Berechnen</button>
 
-    <h2>Deine Packliste:</h2>
+    <h2>Deine Packliste (inkl. 1 Auswechselstück pro Teil):</h2>
     <ul>
         <li>T-Shirts: <span id="tshirts">0</span></li>
         <li>Unterwäsche: <span id="unterwaesche">0</span></li>
@@ -23,23 +33,51 @@
 
     <script>
         function berechneKleidung() {
-            // Holt die Anzahl der Tage aus dem Eingabefeld
-            const tage = parseInt(document.getElementById('tage').value) || 0;
+            // Holt die Anzahl der Nächte
+            const naechte = parseInt(document.getElementById('naechte').value);
+            const brauchtPulli = document.getElementById('brauchtPulli').value === 'ja';
             
-            if (tage <= 0) {
-                alert("Bitte gib eine gültige Anzahl an Tagen ein.");
+            if (isNaN(naechte) || naechte < 0) {
+                alert("Bitte gib eine gültige Anzahl an Nächten ein.");
                 return;
             }
 
-            // Regel 1: T-Shirts alle 3 Tage wechseln (aufgerundet)
-            const tshirts = Math.ceil(tage / 3);
-            
-            // Regel 2: Unterwäsche jeden Tag wechseln
-            const unterwaesche = tage;
-            
-            // Regel 3: Pulli und Hose "viel" (hier als Basis 1 pro Woche / alle 7 Tage berechnet)
-            const hosen = Math.ceil(tage / 7);
-            const pullis = Math.ceil(tage / 7);
+            // Urlaubstage berechnen (Nächte + 1)
+            // Z.B. 1 Nacht = 2 Tage (Anreisetag & Abreisetag)
+            const tageGesamt = naechte + 1;
+
+            // --- 1. T-SHIRTS BERECHNUNG ---
+            let tshirts = 0;
+            if (tageGesamt === 1) {
+                // Nur ein Tagesausflug
+                tshirts = 1;
+            } else {
+                // Anreisetag (1) + Abreisetag (1) = 2 T-Shirts
+                // Für die Tage dazwischen gilt: alle 3 Tage ein neues
+                const tageDazwischen = tageGesamt - 2;
+                const tshirtsDazwischen = Math.ceil(tageDazwischen / 3);
+                tshirts = 2 + tshirtsDazwischen;
+            }
+            // +1 Auswechselstück
+            tshirts += 1;
+
+
+            // --- 2. UNTERWÄSCHE BERECHNUNG ---
+            // Jeden Tag 1 Stück + 1 Auswechselstück
+            let unterwaesche = tageGesamt + 1;
+
+
+            // --- 3. HOSEN BERECHNUNG ---
+            // "Viel" tragen -> Basis: 1 Hose pro angefangene 7 Tage + 1 Auswechselstück
+            let hosen = Math.ceil(tageGesamt / 7) + 1;
+
+
+            // --- 4. PULLIS BERECHNUNG ---
+            // Wenn Pullis gebraucht werden: gleiche Logik wie Hosen. Sonst 0.
+            let pullis = 0;
+            if (brauchtPulli) {
+                pullis = Math.ceil(tageGesamt / 7) + 1;
+            }
 
             // Ergebnisse auf der Seite anzeigen
             document.getElementById('tshirts').innerText = tshirts;
