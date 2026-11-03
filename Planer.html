@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Urlaubs-Kleidungsrechner</title>
+</head>
+<body>
+
+    <h1>Kleidungs-Urlaubsrechner</h1>
+    
+    <label for="tage">Wie viele Tage bist du im Urlaub?</label>
+    <input type="number" id="tage" min="1" value="1">
+    
+    <button onclick="berechneKleidung()">Berechnen</button>
+
+    <h2>Deine Packliste:</h2>
+    <ul>
+        <li>T-Shirts: <span id="tshirts">0</span></li>
+        <li>Unterwäsche: <span id="unterwaesche">0</span></li>
+        <li>Hosen: <span id="hosen">0</span></li>
+        <li>Pullis: <span id="pullis">0</span></li>
+    </ul>
+
+    <script>
+        function berechneKleidung() {
+            // Holt die Anzahl der Tage aus dem Eingabefeld
+            const tage = parseInt(document.getElementById('tage').value) || 0;
+            
+            if (tage <= 0) {
+                alert("Bitte gib eine gültige Anzahl an Tagen ein.");
+                return;
+            }
+
+            // Regel 1: T-Shirts alle 3 Tage wechseln (aufgerundet)
+            const tshirts = Math.ceil(tage / 3);
+            
+            // Regel 2: Unterwäsche jeden Tag wechseln
+            const unterwaesche = tage;
+            
+            // Regel 3: Pulli und Hose "viel" (hier als Basis 1 pro Woche / alle 7 Tage berechnet)
+            const hosen = Math.ceil(tage / 7);
+            const pullis = Math.ceil(tage / 7);
+
+            // Ergebnisse auf der Seite anzeigen
+            document.getElementById('tshirts').innerText = tshirts;
+            document.getElementById('unterwaesche').innerText = unterwaesche;
+            document.getElementById('hosen').innerText = hosen;
+            document.getElementById('pullis').innerText = pullis;
+        }
+    </script>
+
+</body>
+</html>
