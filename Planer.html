@@ -2,54 +2,198 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kleidungsplaner</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --primary: #4a5568;
+            --primary-hover: #2d3748;
+            --accent: #3182ce;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            max-width: 480px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 24px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 28px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        input[type="date"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 15px;
+            color: var(--text-main);
+            background-color: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="date"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .info-box {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .packliste {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .packliste-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 16px;
+        }
+
+        .packliste-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            background-color: #edf2f7;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 15px;
+            min-width: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Kleidungsplaner</h1>
-    
-    <p>
-        <label for="anreise">Anreisedatum:</label><br>
-        <input type="date" id="anreise" onchange="setzeMindestAbreise()">
-    </p>
+    <div class="container">
+        <h1>Kleidungsplaner</h1>
+        
+        <div class="form-group">
+            <label for="anreise">Anreisedatum</label>
+            <input type="date" id="anreise" onchange="setzeMindestAbreise()">
+        </div>
 
-    <p>
-        <label for="abreise">Abreisedatum:</label><br>
-        <input type="date" id="abreise">
-    </p>
+        <div class="form-group">
+            <label for="abreise">Abreisedatum</label>
+            <input type="date" id="abreise">
+        </div>
 
-    <p>
-        <label for="brauchtPulli">Brauchst du überhaupt Pullis?</label><br>
-        <select id="brauchtPulli">
-            <option value="ja">Ja</option>
-            <option value="nein">Nein (Sommerurlaub)</option>
-        </select>
-    </p>
-    
-    <button onclick="berechneKleidung()">Berechnen</button>
+        <div class="form-group">
+            <label for="brauchtPulli">Brauchst du überhaupt Pullis?</label>
+            <select id="brauchtPulli">
+                <option value="ja">Ja</option>
+                <option value="nein">Nein (Sommerurlaub)</option>
+            </select>
+        </div>
+        
+        <button onclick="berechneKleidung()">Berechnen</button>
 
-    <div id="reiseInfo" style="margin-top: 15px; font-weight: bold;"></div>
+        <div id="reiseInfo" class="info-box"></div>
 
-    <h2>Das muss in den Koffer (bereits angezogene Kleidung abgezogen):</h2>
-    <ul>
-        <li>T-Shirts: <span id="tshirts">0</span></li>
-        <li>Unterwäsche: <span id="unterwaesche">0</span></li>
-        <li>Hosen: <span id="hosen">0</span></li>
-        <li>Pullis: <span id="pullis">0</span></li>
-    </ul>
+        <h2>Deine Packliste Koffer</h2>
+        <ul class="packliste">
+            <li class="packliste-item"><span>T-Shirts</span> <span class="badge" id="tshirts">0</span></li>
+            <li class="packliste-item"><span>Unterwäsche</span> <span class="badge" id="unterwaesche">0</span></li>
+            <li class="packliste-item"><span>Hosen</span> <span class="badge" id="hosen">0</span></li>
+            <li class="packliste-item"><span>Pullis</span> <span class="badge" id="pullis">0</span></li>
+        </ul>
+    </div>
 
     <script>
-        // Setzt das heutige Datum als Standard für die Anreise
         const heute = new Date().toISOString().split('T')[0];
         document.getElementById('anreise').value = heute;
         
         function setzeMindestAbreise() {
-            // Das Abreisedatum kann nicht vor dem Anreisedatum liegen
             const anreiseWert = document.getElementById('anreise').value;
             document.getElementById('abreise').min = anreiseWert;
         }
         
-        // Initialisiere das Mindestdatum beim Laden
         setzeMindestAbreise();
 
         function berechneKleidung() {
@@ -65,7 +209,6 @@
             const anreiseDatum = new Date(anreiseInput);
             const abreiseDatum = new Date(abreiseInput);
             
-            // Berechnung der Millisekunden Differenz und Umrechnung in Nächte
             const zeitDifferenz = abreiseDatum.getTime() - anreiseDatum.getTime();
             const naechte = Math.ceil(zeitDifferenz / (1000 * 3600 * 24));
             
@@ -74,22 +217,18 @@
                 return;
             }
 
-            // Gesamte Tage im Urlaub (Nächte + 1)
             const tageGesamt = naechte + 1;
 
-            // Info-Text anzeigen
-            document.getElementById('reiseInfo').innerText = `Deine Reise: ${naechte} Nächte (${tageGesamt} Tage)`;
+            const reiseInfoDiv = document.getElementById('reiseInfo');
+            reiseInfoDiv.innerText = `Deine Reise: ${naechte} Nächte (${tageGesamt} Tage)`;
+            reiseInfoDiv.style.display = 'block';
 
-            // ==========================================
-            // 1. T-SHIRTS BERECHNUNG
-            // ==========================================
             let tshirtsBedarf = 0;
             if (tageGesamt === 1) {
                 tshirtsBedarf = 1;
             } else if (tageGesamt === 2) {
-                tshirtsBedarf = 2; // Anreise + Abreise
+                tshirtsBedarf = 2;
             } else {
-                // Erstes T-Shirt hält Tag 1, 2, 3. Ab Tag 4 neue für dazwischen. Plus Abreisetag.
                 const restTage = tageGesamt - 4; 
                 let tshirtsDazwischen = 0;
                 if (restTage > 0) {
@@ -97,50 +236,26 @@
                 }
                 tshirtsBedarf = 2 + tshirtsDazwischen;
             }
-            // +1 Auswechselstück
             tshirtsBedarf += 1;
-            
-            // Koffer-Menge: Gesamtbedarf minus das T-Shirt am Körper
             let tshirtsKoffer = tshirtsBedarf - 1;
 
-
-            // ==========================================
-            // 2. UNTERWÄSCHE BERECHNUNG
-            // ==========================================
-            // Bedarf: 1 pro Tag + 1 Auswechselstück
             let unterwaescheBedarf = tageGesamt + 1;
-            
-            // Koffer-Menge: minus die Unterwäsche am Körper
             let unterwaescheKoffer = unterwaescheBedarf - 1;
 
-
-            // ==========================================
-            // 3. HOSEN BERECHNUNG
-            // ==========================================
-            // Bedarf: 1 Basis-Hose pro angefangene 7 Tage + 1 Auswechselstück
             let hosenBedarf = Math.ceil(tageGesamt / 7) + 1;
-            
-            // Koffer-Menge: minus die Hose am Körper
             let hosenKoffer = hosenBedarf - 1;
 
-
-            // ==========================================
-            // 4. PULLIS BERECHNUNG
-            // ==========================================
             let pullisKoffer = 0;
             if (brauchtPulli) {
                 let pullisBedarf = Math.ceil(tageGesamt / 7) + 1;
-                // Koffer-Menge: minus den Pulli am Körper
                 pullisKoffer = pullisBedarf - 1;
             }
 
-            // Ergebnisse im HTML aktualisieren
             document.getElementById('tshirts').innerText = Math.max(0, tshirtsKoffer);
             document.getElementById('unterwaesche').innerText = Math.max(0, unterwaescheKoffer);
             document.getElementById('hosen').innerText = Math.max(0, hosenKoffer);
             document.getElementById('pullis').innerText = Math.max(0, pullisKoffer);
         }
     </script>
-
 </body>
 </html>
