@@ -2,15 +2,20 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Urlaubs-Kleidungsrechner</title>
+    <title>Urlaubs-Kleidungsrechner mit Datum</title>
 </head>
 <body>
 
-    <h1>Kleidungsplaner</h1>
+    <h1>Kleidungs-Urlaubsrechner (Nach Datum)</h1>
     
     <p>
-        <label for="naechte">Wie viele Nächte bleibst du?</label><br>
-        <input type="number" id="naechte" min="0" value="3">
+        <label for="anreise">Anreisedatum:</label><br>
+        <input type="date" id="anreise" onchange="setzeMindestAbreise()">
+    </p>
+
+    <p>
+        <label for="abreise">Abreisedatum:</label><br>
+        <input type="date" id="abreise">
     </p>
 
     <p>
@@ -23,6 +28,8 @@
     
     <button onclick="berechneKleidung()">Berechnen</button>
 
+    <div id="reiseInfo" style="margin-top: 15px; font-weight: bold;"></div>
+
     <h2>Das muss in den Koffer (bereits angezogene Kleidung abgezogen):</h2>
     <ul>
         <li>T-Shirts: <span id="tshirts">0</span></li>
@@ -32,17 +39,46 @@
     </ul>
 
     <script>
+        // Setzt das heutige Datum als Standard für die Anreise
+        const heute = new Date().toISOString().split('T')[0];
+        document.getElementById('anreise').value = heute;
+        
+        function setzeMindestAbreise() {
+            // Das Abreisedatum kann nicht vor dem Anreisedatum liegen
+            const anreiseWert = document.getElementById('anreise').value;
+            document.getElementById('abreise').min = anreiseWert;
+        }
+        
+        // Initialisiere das Mindestdatum beim Laden
+        setzeMindestAbreise();
+
         function berechneKleidung() {
-            const naechte = parseInt(document.getElementById('naechte').value);
+            const anreiseInput = document.getElementById('anreise').value;
+            const abreiseInput = document.getElementById('abreise').value;
             const brauchtPulli = document.getElementById('brauchtPulli').value === 'ja';
             
-            if (isNaN(naechte) || naechte < 0) {
-                alert("Bitte gib eine gültige Anzahl an Nächten ein.");
+            if (!anreiseInput || !abreiseInput) {
+                alert("Bitte gib sowohl ein Anreise- als auch ein Abreisedatum ein.");
+                return;
+            }
+
+            const anreiseDatum = new Date(anreiseInput);
+            const abreiseDatum = new Date(abreiseInput);
+            
+            // Berechnung der Millisekunden Differenz und Umrechnung in Nächte
+            const zeitDifferenz = abreiseDatum.getTime() - anreiseDatum.getTime();
+            const naechte = Math.ceil(zeitDifferenz / (1000 * 3600 * 24));
+            
+            if (naechte < 0) {
+                alert("Das Abreisedatum darf nicht vor dem Anreisedatum liegen.");
                 return;
             }
 
             // Gesamte Tage im Urlaub (Nächte + 1)
             const tageGesamt = naechte + 1;
+
+            // Info-Text anzeigen
+            document.getElementById('reiseInfo').innerText = `Deine Reise: ${naechte} Nächte (${tageGesamt} Tage)`;
 
             // ==========================================
             // 1. T-SHIRTS BERECHNUNG
@@ -104,9 +140,6 @@
             document.getElementById('hosen').innerText = Math.max(0, hosenKoffer);
             document.getElementById('pullis').innerText = Math.max(0, pullisKoffer);
         }
-
-        // Direkt beim Laden ausführen
-        window.onload = berechneKleidung;
     </script>
 
 </body>
