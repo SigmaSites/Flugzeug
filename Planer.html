@@ -5,161 +5,250 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kleidungsplaner</title>
     <style>
+        :root {
+            --yellow: #eab308;
+            --yellow-dark: #a16207;
+            --yellow-text: #2d2003;
+            --blue: #38bdf8;
+            --blue-dark: #1fa8e0;
+            --blue-text: #072a3a;
+            --bg-start: #2b2d42;
+            --bg-end: #1a1c2e;
+            --card-bg: #23253f;
+            --text: #f4f4f9;
+            --muted: #a0a3c0;
+            --border: #3a3d63;
+            --input-bg: #1a1c2e;
+            --error-bg: #3a0d0d;
+            --error-text: #f87171;
+            --success-bg: #10331e;
+            --success-text: #4ade80;
+        }
+        * { box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 20px;
-            background-color: #ffffff;
-            color: #000000;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(160deg, var(--bg-start), var(--bg-end));
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
         }
-
-        h1 {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 25px;
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            text-align: center;
+            width: 100%;
+            max-width: 380px;
         }
-
         h2 {
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 30px;
-            margin-bottom: 20px;
+            font-size: 1.3rem;
+            margin: 0 0 20px;
+            letter-spacing: 0.5px;
+            color: var(--text);
+        }
+        h3 {
+            font-size: 1rem;
+            margin: 24px 0 12px;
+            color: var(--muted);
+            font-weight: 600;
         }
 
-        p {
-            margin: 15px 0;
-            font-size: 16px;
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+            text-align: left;
         }
-
         label {
-            font-size: 16px;
-            display: inline-block;
-            margin-bottom: 5px;
-        }
-
-        input[type="date"], select {
-            font-family: inherit;
             font-size: 14px;
-            padding: 4px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 180px;
+            color: var(--muted);
+        }
+        input[type="date"], select {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 16px;
+            color: var(--text);
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color-scheme: dark;
+        }
+        input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 50px;
+        }
+        input[type="date"]:focus-visible, select:focus-visible {
+            outline: 3px solid var(--blue);
+            outline-offset: 2px;
         }
 
         button {
-            font-family: inherit;
-            font-size: 14px;
-            padding: 4px 12px;
-            background-color: #f0f0f0;
-            color: #000000;
-            border: 1px solid #ababab;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-
-        button:hover {
-            background-color: #e5e5e5;
-            border-color: #8c8c8c;
-        }
-
-        #reiseInfo {
-            margin-top: 15px;
-            font-weight: bold;
+            width: 100%;
+            padding: 14px;
+            margin-top: 6px;
             font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--blue);
+            color: var(--blue-text);
+            transition: transform 0.1s ease, opacity 0.15s ease;
+        }
+        button:hover { background: var(--blue-dark); }
+        button:active { transform: scale(0.96); }
+        button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+        .status {
+            font-size: 13px;
+            text-align: left;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+            word-break: break-word;
+            display: none;
+            white-space: pre-line;
+        }
+        .status.error {
+            background: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid rgba(248,113,113,0.3);
+        }
+        .status.success {
+            background: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid rgba(74,222,128,0.3);
         }
 
         ul {
-            list-style-type: disc;
-            padding-left: 20px;
-            margin: 10px 0;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-
         li {
-            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
             font-size: 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        li span {
+            font-weight: 600;
+            color: var(--yellow);
         }
     </style>
 </head>
 <body>
 
-    <h1>Kleidungplaner</h1>
-    
-    <p>
-        <label for="anreise">Wie viele Nächte bleibst du?</label><br>
-        <input type="date" id="anreise" onchange="setzeMindestAbreise()">
-    </p>
+    <div class="card">
+        <h2>Kleidungsplaner</h2>
 
-    <p>
-        <label for="abreise">Brauchst du überhaupt Pullis?</label><br>
-        <input type="date" id="abreise">
-    </p>
+        <div class="field">
+            <label for="anreise">Anreisedatum</label>
+            <input type="date" id="anreise" onchange="setzeMindestAbreise()">
+        </div>
 
-    <p>
-        <label for="brauchtPulli">Brauchst du überhaupt Pullis?</label><br>
-        <select id="brauchtPulli">
-            <option value="ja">Ja</option>
-            <option value="nein">Nein</option>
-        </select>
-    </p>
-    
-    <button onclick="berechneKleidung()">Berechnen</button>
+        <div class="field">
+            <label for="abreise">Abreisedatum</label>
+            <input type="date" id="abreise">
+        </div>
 
-    <div id="reiseInfo"></div>
+        <div class="field">
+            <label for="brauchtPulli">Brauchst du überhaupt Pullis?</label>
+            <select id="brauchtPulli">
+                <option value="ja">Ja</option>
+                <option value="nein">Nein</option>
+            </select>
+        </div>
 
-    <h2>Deine Packliste (inkl. 1 Auswechselstück pro Teil):</h2>
-    <ul>
-        <li>T-Shirts: <span id="tshirts">0</span></li>
-        <li>Unterwäsche: <span id="unterwaesche">0</span></li>
-        <li>Hosen: <span id="hosen">0</span></li>
-        <li>Pullis: <span id="pullis">0</span></li>
-    </ul>
+        <button onclick="berechneKleidung()">Berechnen</button>
+
+        <div id="reiseInfo" class="status" role="status" aria-live="polite"></div>
+
+        <h3>Deine Packliste (inkl. 1 Auswechselstück pro Teil)</h3>
+        <ul>
+            <li>T-Shirts <span id="tshirts">0</span></li>
+            <li>Unterwäsche <span id="unterwaesche">0</span></li>
+            <li>Hosen <span id="hosen">0</span></li>
+            <li>Pullis <span id="pullis">0</span></li>
+        </ul>
+    </div>
 
     <script>
+        const statusBox = document.getElementById('reiseInfo');
+
+        function setStatus(type, message) {
+            statusBox.className = 'status ' + type;
+            statusBox.textContent = message;
+            statusBox.style.display = 'block';
+        }
+
         // Setzt das heutige Datum als Standard für die Anreise
         const heute = new Date().toISOString().split('T');
         document.getElementById('anreise').value = heute[0];
-        
+
         function setzeMindestAbreise() {
             const anreiseWert = document.getElementById('anreise').value;
             document.getElementById('abreise').min = anreiseWert;
         }
-        
+
         setzeMindestAbreise();
 
         function berechneKleidung() {
             const anreiseInput = document.getElementById('anreise').value;
             const abreiseInput = document.getElementById('abreise').value;
             const brauchtPulli = document.getElementById('brauchtPulli').value === 'ja';
-            
+
             if (!anreiseInput || !abreiseInput) {
-                alert("Bitte gib sowohl ein Anreise- als auch ein Abreisedatum ein.");
+                setStatus('error', 'Bitte gib sowohl ein Anreise- als auch ein Abreisedatum ein.');
                 return;
             }
 
             const anreiseDatum = new Date(anreiseInput);
             const abreiseDatum = new Date(abreiseInput);
-            
+
             const zeitDifferenz = abreiseDatum.getTime() - anreiseDatum.getTime();
             const naechte = Math.ceil(zeitDifferenz / (1000 * 3600 * 24));
-            
+
             if (naechte < 0) {
-                alert("Das Abreisedatum darf nicht vor dem Anreisedatum liegen.");
+                setStatus('error', 'Das Abreisedatum darf nicht vor dem Anreisedatum liegen.');
                 return;
             }
 
             const tageGesamt = naechte + 1;
 
-            document.getElementById('reiseInfo').innerText = `Deine Reise: ${naechte} Nächte (${tageGesamt} Tage)`;
+            setStatus('success', `Deine Reise: ${naechte} Nächte (${tageGesamt} Tage)`);
 
             // --- 1. T-SHIRTS BERECHNUNG ---
             let tshirtsBedarf = 0;
             if (tageGesamt === 1) {
                 tshirtsBedarf = 1;
             } else if (tageGesamt === 2) {
-                tshirtsBedarf = 2; 
+                tshirtsBedarf = 2;
             } else {
-                const restTage = tageGesamt - 4; 
+                const restTage = tageGesamt - 4;
                 let tshirtsDazwischen = 0;
                 if (restTage > 0) {
                     tshirtsDazwischen = Math.ceil(restTage / 3);
